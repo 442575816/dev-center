@@ -47,6 +47,10 @@
                     }
                 ]
             },
+            created: function()
+            {
+                this.fileList = []
+            },
             methods: {
                 reverseMessage: function() {
                     this.message = this.message.split('').reverse().join('')
