@@ -23,6 +23,9 @@ axios.defaults.transformRequest = [function (data) {
 
 // 收到响应后预处理数据
 axios.defaults.transformResponse = [function (text) {
+    if (typeof(text) != "string") {
+        return text
+    }
     let response = JSON.parse(text)
     if (response.state == 4 && vueContext.vue) {
         vueContext.vue.$message({
