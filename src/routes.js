@@ -23,7 +23,7 @@ let routes = [
         path: '/',
         component: Home,
         name: '文件转移',
-        iconCls: 'el-icon-message',//图标样式class
+        iconCls: 'el-icon-upload',//图标样式class
         children: [
             { path: '/main', component: Main, name: '主页', hidden: true },
             { path: '/fileout', component: FileOut, name: '内转外' },

@@ -10,14 +10,18 @@ import Vuex from 'vuex'
 //import NProgress from 'nprogress'
 //import 'nprogress/nprogress.css'
 import routes from './routes'
-import Mock from './mock'
-Mock.bootstrap();
+// import Mock from './mock'
+// Mock.bootstrap();
 import 'font-awesome/css/font-awesome.min.css'
+
+import { directive } from 'namedavatar/src/vue'
 
 Vue.use(ElementUI)
 Vue.use(VueRouter)
 Vue.use(Vuex)
 
+// register as directive
+Vue.directive('avatar', directive);
 //NProgress.configure({ showSpinner: false });
 
 const router = new VueRouter({

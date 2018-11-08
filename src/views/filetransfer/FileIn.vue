@@ -10,12 +10,13 @@
 		<br/>
 		<el-upload
 			class="upload-demo"
-			action="https://jsonplaceholder.typicode.com/posts/"
+			action="http://127.0.0.1:8011/root/fileIn.action"
 			ref="upload"
 			:on-change="handleChange"
 			:on-progress="handleProgress"
 			:auto-upload="false"
 			:show-file-list="false"
+			:with-credentials="true"
 			drag
 			multiple
 			>
@@ -45,7 +46,7 @@
 							</div>
 						</div>
 					</div>
-					<div class="el-progress__text" style="font-size: 12.8px;">{{ file.percentage }}%</div>
+					<div class="el-progress__text" style="font-size: 12.8px;right:30px">{{ file.percentage }}%</div>
 				</div>
 				</li>
 			</ul>
@@ -54,7 +55,7 @@
 		<br/>
 		<div>
 			<el-table
-				:data="uploadHistory"
+				:data="uploadHistory.slice((currentPage-1)*pagesize, currentPage*pagesize)"
 				style="width: 100%"
 				:default-sort = "{prop: 'date', order: 'descending'}"
 				>
@@ -68,12 +69,13 @@
 				prop="fileSize"
 				label="文件大小"
 				sortable
+				:formatter="fileSizeFormatter"
 				width="180">
 			</el-table-column>
 			<el-table-column
 				prop="uploadTime"
 				label="上传时间"
-				:formatter="formatter">
+				:formatter="dateTimeFormatter">
 			</el-table-column>
 			<el-table-column label="操作">
 				<template slot-scope="scope">
@@ -90,30 +92,44 @@
 			<el-pagination
 				background
 				layout="prev, pager, next"
-				:page-size="10"
-				:total="100">
+				:page-size="pagesize"
+				@current-change="handleCurrentPageChange"
+				@size-change="handlePageSizeChange"
+				:total="uploadHistory.length">
 			</el-pagination>
 		</div>
 	</div>
 </template>
 
 <script>
+import { setTimeout } from 'timers';
+import { getFileInList, downloadFile } from '../../api/api';
+import { vueContext } from '../../api/api';
+import Vue from 'vue';
+
 export default {
     data() {
 			return {
 				  fileList: [],
 				  center: true,
 				  closable: false,
-				  uploadHistory:[
-					  {
-						  name: "傲世堂UnityConnect第九期.pptx",
-						  fileSize: 231565018,
-						  uploadTime: 1541070294
-					  }
-				  ]
+				  uploadHistory:[],
+				  pagesize: 10,
+				  currentPage: 1,
 			}
 				
 		},
+	created: function() {
+		// 请求文件历史
+		var _this = this;
+		vueContext.vue = this
+		getFileInList().then(function(resp){
+			_this.uploadHistory = resp.data.data.files
+			console.log(_this.uploadHistory)
+		}).catch(err=>{
+			console.log(err);
+		})
+	},
     methods: {
 			// 正式上传文件
 			submitUpload(){
@@ -144,6 +160,17 @@ export default {
 					return Math.ceil(size * 100) / 100 + "KB"
 				}
 			},
+			// 请求文件下载历史
+			refreshTransferFileHisotry() {
+				console.log("refreshTransferFileHisotry")
+				// 请求文件历史
+				var _this = this;
+				getFileInList().then(function(resp){
+					_this.uploadHistory = resp.data.data.files
+				}).catch(err=>{
+					console.log(err);
+				})
+			},
 			// 上传进度显示
 			handleProgress(event, file, fileList) {
 				var localFile = null;
@@ -167,19 +194,84 @@ export default {
 							status: file.status,
 							percentage: file.percentage
 						});
+				} else {
+					var localFile = null;
+					for (var index in this.fileList) {
+						if (this.fileList[index].uid == file.uid) {
+							localFile = this.fileList[index];
+							break;
+						}
+					}
+					if (null != localFile) {
+						localFile.status = file.status
+						if (localFile.status == "success") {
+							localFile.percentage = 100
+							var _this = this
+							setTimeout(function(){
+								_this.refreshTransferFileHisotry()
+							}, 1000)
+						}
+					}
 				}
 			},
 			// 下载历史文件
 			handleDownload(index, row) {
-				console.log("index:" + index + ", row:" + row)
+				// let url = "http://127.0.0.1:8011/root/download.action?file=" + row.fileId;
+				// window.location.href = url;
+				var _this = this;  
+				downloadFile({
+					file: row.fileId
+				}).then((resp)=>{
+					console.log(resp);
+					if (!resp) {
+						_this.$notify.error({
+							title: '提示',
+							message: '文件错误，无法下载',
+							duration: 0
+						});
+						return;
+					} else if (resp.data.type == 'application/json') {
+						_this.$notify.error({
+							title: '提示',
+							message: '文件已过期或者被删除',
+							duration: 0
+						});
+						return;
+					}
+					if ('download' in document.createElement('a')) { // 非IE下载
+						let aTag = document.createElement('a')
+						aTag.download = row.name
+						aTag.href = URL.createObjectURL(resp.data)
+						aTag.click()
+						URL.revokeObjectURL(aTag.href)
+					} else {// IE10+下载
+						navigator.msSaveBlob(resp.data, row.name)
+					}
+				}).catch(err=>{
+					console.log(err);
+				})
 			},
 			// 删除历史文件
 			handleDelete(index, row) {
 				console.log("index:" + index + ", row:" + row)
 			},
-			// 格式化数据
-			formatter(row, column) {
-				return new Date(row.uploadTime * 1000).toLocaleString();
+			// 分页组件当前页发生变化
+			handleCurrentPageChange(val) {
+				this.currentPage = val
+				console.log("currentPage:" + this.currentPage)
+			},
+			// 分页组件每页显示大小发生变化
+			handlePageSizeChange(val) {
+				this.pagesize = val
+				console.log("pagesize:" + this.pagesize)
+			},
+			// 格式化时间数据
+			dateTimeFormatter(row, column) {
+				return new Date(row.uploadTime).toLocaleString();
+			},
+			// 格式化文件大小
+			fileSizeFormatter(row, column) {
+				return this.formatFileSize(row.fileSize);
 			}
     }
   }

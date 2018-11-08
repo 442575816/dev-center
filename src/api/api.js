@@ -1,17 +1,46 @@
 import axios from 'axios';
+import Qs from 'qs'
 
-let base = '';
+// url base
+let base = 'http://127.0.0.1:8011/root';
 
-export const requestLogin = params => { return axios.post(`${base}/login`, params).then(res => res.data); };
+// vue基础上下文
+let vueContext = {}
 
-export const getUserList = params => { return axios.get(`${base}/user/list`, { params: params }); };
+export { vueContext }
 
-export const getUserListPage = params => { return axios.get(`${base}/user/listpage`, { params: params }); };
+// 默认携带cookies信息
+axios.defaults.withCredentials = true
 
-export const removeUser = params => { return axios.get(`${base}/user/remove`, { params: params }); };
+// 发送请求前处理request的数据
+axios.defaults.transformRequest = [function (data) {
+    let newData = ''
+    for (let k in data) {
+      newData += encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) + '&'
+    }
+    return newData
+}]
 
-export const batchRemoveUser = params => { return axios.get(`${base}/user/batchremove`, { params: params }); };
+// 收到响应后预处理数据
+axios.defaults.transformResponse = [function (text) {
+    let response = JSON.parse(text)
+    if (response.state == 4 && vueContext.vue) {
+        vueContext.vue.$message({
+            message: response.data.msg,
+            type: 'error'
+        });
+        setTimeout(function(){
+            vueContext.vue.$router.push({ path: '/login' });
+        }, 2000)
+    }
+    return response;
+}]
 
-export const editUser = params => { return axios.get(`${base}/user/edit`, { params: params }); };
+// Login请求
+export const requestLogin = params => { return axios.post(`${base}/login.action`, params).then(res => res.data); };
 
-export const addUser = params => { return axios.get(`${base}/user/add`, { params: params }); };
+// 获取外传内文件列表
+export const getFileInList = params => { return axios.post(`${base}/getFileInList.action`, params); };
+
+// 下载文件
+export const downloadFile = params => { return axios.get(`${base}/download.action`, { params: params, responseType:'blob' }); };

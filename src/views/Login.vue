@@ -23,8 +23,8 @@
       return {
         logining: false,
         ruleForm2: {
-          account: 'admin',
-          checkPass: '123456'
+          account: '',
+          checkPass: ''
         },
         rules2: {
           account: [
@@ -39,6 +39,15 @@
         checked: true
       };
     },
+    created: function() {
+        var user = sessionStorage.getItem("user")
+        console.log("user：" + user);
+        if (null != user) {
+          user = JSON.parse(user)
+          this.ruleForm2.account = user.userName
+          this.ruleForm2.checkPass = user.password
+        } 
+    },
     methods: {
       handleReset2() {
         this.$refs.ruleForm2.resetFields();
@@ -50,19 +59,24 @@
             //_this.$router.replace('/table');
             this.logining = true;
             //NProgress.start();
-            var loginParams = { username: this.ruleForm2.account, password: this.ruleForm2.checkPass };
+            var loginParams = { userName: this.ruleForm2.account, password: this.ruleForm2.checkPass };
             requestLogin(loginParams).then(data => {
               this.logining = false;
               //NProgress.done();
-              let { msg, code, user } = data;
-              if (code !== 200) {
+              if (data.state != 1) {
                 this.$message({
-                  message: msg,
+                  message: data.data.msg,
                   type: 'error'
                 });
               } else {
+                var user = {
+                  userName: data.data.userName,
+                  password: this.ruleForm2.checkPass,
+                  nickName: data.data.nickName
+                }
+                console.log("save:" + JSON.stringify(user))
                 sessionStorage.setItem('user', JSON.stringify(user));
-                this.$router.push({ path: '/table' });
+                this.$router.push({ path: '/' });
               }
             });
           } else {
