@@ -32,6 +32,11 @@ axios.defaults.transformResponse = [function (text) {
         setTimeout(function(){
             vueContext.vue.$router.push({ path: '/login' });
         }, 2000)
+    } else if (response.state == 0 && vueContext.vue) {
+        vueContext.vue.$message({
+            message: response.data.msg,
+            type: 'error'
+        });
     }
     return response;
 }]
@@ -41,6 +46,9 @@ export const requestLogin = params => { return axios.post(`${base}/login.action`
 
 // 获取外传内文件列表
 export const getFileInList = params => { return axios.post(`${base}/getFileInList.action`, params); };
+
+// 获取内传外文件列表
+export const getFileOutList = params => { return axios.post(`${base}/getFileOutList.action`, params); };
 
 // 下载文件
 export const downloadFile = params => { return axios.get(`${base}/download.action`, { params: params, responseType:'blob' }); };

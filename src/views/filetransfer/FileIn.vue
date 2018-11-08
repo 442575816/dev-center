@@ -17,6 +17,7 @@
 			:auto-upload="false"
 			:show-file-list="false"
 			:with-credentials="true"
+			:on-success="handleSuccess"
 			drag
 			multiple
 			>
@@ -26,7 +27,7 @@
 		</el-upload>
 		<!-- 上传按钮 -->
 		<div>
-			<el-button style="margin-top: 5px;margin-left: 0px;" size="medium" type="success" @click="submitUpload">上传到服务器</el-button>
+			<el-button style="margin-top: 5px;margin-left: 0px;" size="medium" type="success" @click="submitUpload" :disabled="networkType!=2">上传到服务器</el-button>
 		</div>
 		<!-- 上传文件显示区域 -->
 		<div>
@@ -64,6 +65,10 @@
 				label="文件名"
 				sortable
 				width="200">
+				<template slot-scope="scope">
+					<el-tag type="success">外</el-tag>
+					{{scope.row.name}}
+				</template>
 			</el-table-column>
 			<el-table-column
 				prop="fileSize"
@@ -75,6 +80,7 @@
 			<el-table-column
 				prop="uploadTime"
 				label="上传时间"
+				sortable
 				:formatter="dateTimeFormatter">
 			</el-table-column>
 			<el-table-column label="操作">
@@ -82,10 +88,6 @@
 				<el-button
 					size="mini"
 					@click="handleDownload(scope.$index, scope.row)">下载</el-button>
-				<el-button
-					size="mini"
-					type="danger"
-					@click="handleDelete(scope.$index, scope.row)">删除</el-button>
 				</template>
 			</el-table-column>
 			</el-table>
@@ -116,6 +118,7 @@ export default {
 				  uploadHistory:[],
 				  pagesize: 10,
 				  currentPage: 1,
+				  networkType: 0,
 			}
 				
 		},
@@ -125,7 +128,6 @@ export default {
 		vueContext.vue = this
 		getFileInList().then(function(resp){
 			_this.uploadHistory = resp.data.data.files
-			console.log(_this.uploadHistory)
 		}).catch(err=>{
 			console.log(err);
 		})
@@ -133,7 +135,6 @@ export default {
     methods: {
 			// 正式上传文件
 			submitUpload(){
-				console.log("upload file")
 				this.$refs.upload.submit();
 			},
 			// 移除文件
@@ -162,7 +163,6 @@ export default {
 			},
 			// 请求文件下载历史
 			refreshTransferFileHisotry() {
-				console.log("refreshTransferFileHisotry")
 				// 请求文件历史
 				var _this = this;
 				getFileInList().then(function(resp){
@@ -222,7 +222,6 @@ export default {
 				downloadFile({
 					file: row.fileId
 				}).then((resp)=>{
-					console.log(resp);
 					if (!resp) {
 						_this.$notify.error({
 							title: '提示',
@@ -231,10 +230,9 @@ export default {
 						});
 						return;
 					} else if (resp.data.type == 'application/json') {
-						_this.$notify.error({
-							title: '提示',
+						_this.$message({
 							message: '文件已过期或者被删除',
-							duration: 0
+							type: 'error'
 						});
 						return;
 					}
@@ -251,19 +249,23 @@ export default {
 					console.log(err);
 				})
 			},
-			// 删除历史文件
-			handleDelete(index, row) {
-				console.log("index:" + index + ", row:" + row)
+			// 文件上传有应答回调
+			handleSuccess(resp, file, fileList) {
+				if (resp.state == 0) {
+					this.$message({
+						message: resp.data.msg,
+						type: 'error'
+					});
+					return;
+				}
 			},
 			// 分页组件当前页发生变化
 			handleCurrentPageChange(val) {
 				this.currentPage = val
-				console.log("currentPage:" + this.currentPage)
 			},
 			// 分页组件每页显示大小发生变化
 			handlePageSizeChange(val) {
 				this.pagesize = val
-				console.log("pagesize:" + this.pagesize)
 			},
 			// 格式化时间数据
 			dateTimeFormatter(row, column) {
@@ -273,8 +275,15 @@ export default {
 			fileSizeFormatter(row, column) {
 				return this.formatFileSize(row.fileSize);
 			}
-    }
-  }
+	},
+	mounted() {
+		var user = sessionStorage.getItem('user');
+		if (user) {
+			user = JSON.parse(user);
+			this.networkType = user.networkType
+		}
+	}
+}
 
 </script>
 

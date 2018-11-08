@@ -17,6 +17,7 @@
 
 <script>
   import { requestLogin } from '../api/api';
+  import {setCookie,getCookie,delCookie} from '../utils/cookie'
   //import NProgress from 'nprogress'
   export default {
     data() {
@@ -40,8 +41,7 @@
       };
     },
     created: function() {
-        var user = sessionStorage.getItem("user")
-        console.log("user：" + user);
+        var user = getCookie('op_account_info')
         if (null != user) {
           user = JSON.parse(user)
           this.ruleForm2.account = user.userName
@@ -72,11 +72,20 @@
                 var user = {
                   userName: data.data.userName,
                   password: this.ruleForm2.checkPass,
-                  nickName: data.data.nickName
+                  nickName: data.data.nickName,
+                  networkType: data.data.networkType
                 }
-                console.log("save:" + JSON.stringify(user))
                 sessionStorage.setItem('user', JSON.stringify(user));
                 this.$router.push({ path: '/' });
+
+                if (this.checked) {
+                  // 记住用户名
+                  let accountInfo = JSON.stringify({userName:user.userName, password: user.password})
+                  setCookie("op_account_info", accountInfo)
+                } else {
+                  // 删除cookie记录
+                  delCookie("op_account_info")
+                }
               }
             });
           } else {

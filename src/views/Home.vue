@@ -51,7 +51,8 @@
 			<section class="content-container">
 				<div class="grid-content bg-purple-light">
 					<el-col :span="24" class="breadcrumb-container">
-						<strong class="title">{{$route.name}}</strong>
+						<span style="font-size:20px;color:#606266;">{{$route.matched[0].name}} - </span>
+						<span style="color:#909399;">{{$route.name}}</span>
 						<!-- <el-breadcrumb separator="/" class="breadcrumb-inner">
 							<el-breadcrumb-item v-for="item in $route.matched" :key="item.path">
 								{{ item.name }}
@@ -91,13 +92,13 @@
 		},
 		methods: {
 			onSubmit() {
-				console.log('submit!');
+				// console.log('submit!');
 			},
 			handleopen() {
-				console.log('handleopen');
+				// console.log('handleopen');
 			},
 			handleclose() {
-				console.log('handleclose');
+				// console.log('handleclose');
 			},
 			handleselect: function (a, b) {
 			},
@@ -132,7 +133,6 @@
 				user = JSON.parse(user);
 				this.sysUserName = user.nickName || '';
 			}
-
 		}
 	}
 
@@ -140,6 +140,9 @@
 
 <style scoped lang="scss">
 	@import '~scss_vars';
+	.el-col {
+		margin-bottom: 10px;
+	}
 	.container {
 		position: absolute;
 		top: 0px;
