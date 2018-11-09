@@ -4,6 +4,7 @@ import Home from './views/Home.vue'
 import Main from './views/Main.vue'
 import FileOut from './views/filetransfer/FileOut.vue'
 import FileIn from './views/filetransfer/FileIn.vue'
+import SvnAuth from './views/svn/SvnAuth.vue'
 
 let routes = [
     {
@@ -28,6 +29,16 @@ let routes = [
             { path: '/main', component: Main, name: '主页', hidden: true },
             { path: '/fileout', component: FileOut, name: '内转外' },
             { path: '/filein', component: FileIn, name: '外转内' },
+        ]
+    },
+    {
+        path: '/',
+        component: Home,
+        name: 'SVN管理',
+        iconCls: 'el-icon-menu',//图标样式class
+        children: [
+            { path: '/main', component: Main, name: '主页', hidden: true },
+            { path: '/svnauth', component: SvnAuth, name: 'SVN权限申请' },
         ]
     },
     {
