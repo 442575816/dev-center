@@ -55,3 +55,18 @@ export const getFileOutList = params => { return axios.post(`${base}/getFileOutL
 
 // 下载文件
 export const downloadFile = params => { return axios.get(`${base}/download.action`, { params: params, responseType:'blob' }); };
+
+// 外传内上传地址定义
+export const fileInURL = `${base}/fileIn.action`;
+
+// 内传外上传地址定义
+export const fileOutURL = `${base}/fileOut.action`;
+
+// 获取我的审批地址定义
+export const getMyApproveFlowURL = `${base}/getMyApproveFlow.action?flowId=SvnAuth_1`;
+
+// 获取我的申请地址定义
+export const getMyFlowURL = `${base}/getMyFlow.action?flowId=SvnAuth_1`;
+
+// 创建申请地址定义
+export const createFlowURL = `${base}/createFlow.action?flowId=SvnAuth_1`;

@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { createFlowURL } from '../../api/api';
+import { getMyApproveFlowURL } from '../../api/api';
 
 export default {
     data() {
@@ -14,7 +14,7 @@ export default {
       }
     },
     mounted() {
-        this.iframeURL = createFlowURL;
+        this.iframeURL = getMyApproveFlowURL;
         let iframe = document.querySelector('#workflowIf');
         const deviceWidth = document.documentElement.clientWidth;
         const deviceHeight = document.documentElement.clientHeight;

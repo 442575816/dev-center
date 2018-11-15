@@ -10,7 +10,7 @@
 		<br/>
 		<el-upload
 			class="upload-demo"
-			action="http://127.0.0.1:8011/root/fileIn.action"
+			:action="uploadURL"
 			ref="upload"
 			:on-change="handleChange"
 			:on-progress="handleProgress"
@@ -105,7 +105,7 @@
 
 <script>
 import { setTimeout } from 'timers';
-import { getFileInList, downloadFile } from '../../api/api';
+import { getFileInList, downloadFile, fileInURL } from '../../api/api';
 import { vueContext } from '../../api/api';
 import Vue from 'vue';
 
@@ -119,6 +119,7 @@ export default {
 				  pagesize: 10,
 				  currentPage: 1,
 				  networkType: 0,
+				  uploadURL: fileInURL
 			}
 				
 		},
@@ -216,8 +217,6 @@ export default {
 			},
 			// 下载历史文件
 			handleDownload(index, row) {
-				// let url = "http://127.0.0.1:8011/root/download.action?file=" + row.fileId;
-				// window.location.href = url;
 				var _this = this;  
 				downloadFile({
 					file: row.fileId

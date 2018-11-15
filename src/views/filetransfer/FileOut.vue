@@ -10,7 +10,7 @@
 		<br/>
 		<el-upload
 			class="upload-demo"
-			action="http://127.0.0.1:8011/root/fileOut.action"
+			:action="uploadURL"
 			ref="upload"
 			:on-change="handleChange"
 			:on-progress="handleProgress"
@@ -105,7 +105,7 @@
 
 <script>
 import { setTimeout } from 'timers';
-import { getFileOutList, downloadFile } from '../../api/api';
+import { getFileOutList, downloadFile, fileOutURL } from '../../api/api';
 import { vueContext } from '../../api/api';
 import Vue from 'vue';
 
@@ -119,6 +119,7 @@ export default {
 				  pagesize: 10,
 				  currentPage: 1,
 				  networkType: 0,
+				  uploadURL: fileOutURL
 			}
 				
 		},

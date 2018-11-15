@@ -5,6 +5,8 @@ import Main from './views/Main.vue'
 import FileOut from './views/filetransfer/FileOut.vue'
 import FileIn from './views/filetransfer/FileIn.vue'
 import SvnAuth from './views/svn/SvnAuth.vue'
+import MySvnAuth from './views/svn/MySvnAuth.vue'
+import MySvnApprove from './views/svn/MySvnApprove.vue'
 
 let routes = [
     {
@@ -39,6 +41,8 @@ let routes = [
         children: [
             { path: '/main', component: Main, name: '主页', hidden: true },
             { path: '/svnauth', component: SvnAuth, name: 'SVN权限申请' },
+            { path: '/mysvnauth', component: MySvnAuth, name: '我的申请' },
+            { path: '/mysvnapprove', component: MySvnApprove, name: '我的审批' },
         ]
     },
     {
