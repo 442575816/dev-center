@@ -3,7 +3,14 @@ import Qs from 'qs'
 import { getCookie } from '../utils/cookie';
 
 // url base
-let base = 'http://127.0.0.1:8011/root';
+let base = "";
+if (process.env.NODE_ENV == "development") {
+    // 测试URL
+    base = 'http://127.0.0.1:8011/root';
+} else {
+    // 正式URL
+    base = 'http://127.0.0.1:8010/root';
+}
 
 // vue基础上下文
 let vueContext = {}
