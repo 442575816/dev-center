@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Qs from 'qs'
+import { getCookie } from '../utils/cookie';
 
 // url base
 let base = 'http://127.0.0.1:8011/root';
@@ -18,6 +19,7 @@ axios.defaults.transformRequest = [function (data) {
     for (let k in data) {
       newData += encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) + '&'
     }
+    newData += "csrftoken=" + getCookie("csrftoken")
     return newData
 }]
 
@@ -47,6 +49,9 @@ axios.defaults.transformResponse = [function (text) {
 // Login请求
 export const requestLogin = params => { return axios.post(`${base}/login.action`, params).then(res => res.data); };
 
+// LoginByToken请求
+export const requestLoginByToken = params => { return axios.post(`${base}/loginByToken.action`, params).then(res => res.data); };
+
 // 获取外传内文件列表
 export const getFileInList = params => { return axios.post(`${base}/getFileInList.action`, params); };
 
@@ -68,5 +73,5 @@ export const getMyApproveFlowURL = `${base}/getMyApproveFlow.action?flowId=SvnAu
 // 获取我的申请地址定义
 export const getMyFlowURL = `${base}/getMyFlow.action?flowId=SvnAuth_1`;
 
-// 创建申请地址定义
+// 创建申请地址
 export const createFlowURL = `${base}/createFlow.action?flowId=SvnAuth_1`;

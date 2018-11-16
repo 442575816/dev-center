@@ -7,6 +7,9 @@
     <el-form-item prop="checkPass">
       <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off" placeholder="密码"></el-input>
     </el-form-item>
+    <el-form-item prop="checkPass">
+      <el-input type="hidden" v-model="ruleForm2.loginToken" auto-complete="off"></el-input>
+    </el-form-item>
     <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
     <el-form-item style="width:100%;">
       <el-button type="primary" style="width:100%;" @click.native.prevent="handleSubmit2" :loading="logining">登录</el-button>
@@ -16,8 +19,8 @@
 </template>
 
 <script>
-  import { requestLogin } from '../api/api';
-  import {setCookie,getCookie,delCookie} from '../utils/cookie'
+  import { requestLogin, requestLoginByToken } from '../api/api';
+  import { setCookie, getCookie, delCookie } from '../utils/cookie'
   //import NProgress from 'nprogress'
   export default {
     data() {
@@ -45,8 +48,11 @@
         if (null != user) {
           user = JSON.parse(user)
           this.ruleForm2.account = user.userName
-          this.ruleForm2.checkPass = user.password
-        } 
+          this.ruleForm2.checkPass = user.loginToken
+          this.ruleForm2.loginToken = user.loginToken
+        } else {
+          this.ruleForm2.loginToken = ""
+        }
     },
     methods: {
       handleReset2() {
@@ -59,8 +65,15 @@
             //_this.$router.replace('/table');
             this.logining = true;
             //NProgress.start();
+            
             var loginParams = { userName: this.ruleForm2.account, password: this.ruleForm2.checkPass };
-            requestLogin(loginParams).then(data => {
+            var loginRequest = requestLogin
+            if (this.ruleForm2.loginToken != "" && this.ruleForm2.loginToken == this.ruleForm2.checkPass) {
+                // 按照token登录
+                loginRequest = requestLoginByToken
+                loginParams = { userName: this.ruleForm2.account, token: this.ruleForm2.loginToken };
+            }
+            loginRequest(loginParams).then(data => {
               this.logining = false;
               //NProgress.done();
               if (data.state != 1) {
@@ -71,16 +84,16 @@
               } else {
                 var user = {
                   userName: data.data.userName,
-                  password: this.ruleForm2.checkPass,
                   nickName: data.data.nickName,
-                  networkType: data.data.networkType
+                  networkType: data.data.networkType,
+                  loginToken: data.data.loginToken
                 }
                 sessionStorage.setItem('user', JSON.stringify(user));
                 this.$router.push({ path: '/' });
 
                 if (this.checked) {
                   // 记住用户名
-                  let accountInfo = JSON.stringify({userName:user.userName, password: user.password})
+                  let accountInfo = JSON.stringify({userName:user.userName, loginToken: user.loginToken})
                   setCookie("op_account_info", accountInfo)
                 } else {
                   // 删除cookie记录

@@ -20,6 +20,12 @@ export default {
         const deviceHeight = document.documentElement.clientHeight;
         iframe.style.width = (Number(deviceWidth) - 270) + 'px'; //数字是页面布局宽度差值
         iframe.style.height = (Number(deviceHeight) + 70) + 'px'; //数字是页面布局高度差
+    },
+    watch: {
+        "$route": function(from, to) {
+            let iframe = document.querySelector('#workflowIf');
+            iframe.src = createFlowURL
+        }
     }
 }
 </script>
