@@ -55,41 +55,45 @@
         }
     },
     methods: {
+      // 重置登录表单
       handleReset2() {
         this.$refs.ruleForm2.resetFields();
       },
+      // 提交登录表单
       handleSubmit2(ev) {
         var _this = this;
         this.$refs.ruleForm2.validate((valid) => {
           if (valid) {
-            //_this.$router.replace('/table');
             this.logining = true;
-            //NProgress.start();
             
             var loginParams = { userName: this.ruleForm2.account, password: this.ruleForm2.checkPass };
             var loginRequest = requestLogin
+            var loginType = 'RequestLogin'
             if (this.ruleForm2.loginToken != "" && this.ruleForm2.loginToken == this.ruleForm2.checkPass) {
                 // 按照token登录
                 loginRequest = requestLoginByToken
                 loginParams = { userName: this.ruleForm2.account, token: this.ruleForm2.loginToken };
+                loginType = 'RequestLoginByToken'
             }
-            loginRequest(loginParams).then(data => {
-              this.logining = false;
-              //NProgress.done();
-              if (data.state != 1) {
-                this.$message({
-                  message: data.data.msg,
-                  type: 'error'
-                });
-              } else {
+
+            this.$store.dispatch(loginType, loginParams).then((response) => {
+                this.logining = false;
+                if (response.state != 1) {
+                  this.$message({
+                    message: response.data.msg,
+                    type: 'error'
+                  });
+                  return
+                }
+
+                // 存储sessionStore
                 var user = {
-                  userName: data.data.userName,
-                  nickName: data.data.nickName,
-                  networkType: data.data.networkType,
-                  loginToken: data.data.loginToken
+                  userName: response.data.userName,
+                  nickName: response.data.nickName,
+                  networkType: response.data.networkType,
+                  loginToken: response.data.loginToken
                 }
                 sessionStorage.setItem('user', JSON.stringify(user));
-                this.$router.push({ path: '/' });
 
                 if (this.checked) {
                   // 记住用户名
@@ -99,8 +103,9 @@
                   // 删除cookie记录
                   delCookie("op_account_info")
                 }
-              }
-            });
+
+                this.$router.push({ path: '/' });
+            })
           } else {
             console.log('error submit!!');
             return false;

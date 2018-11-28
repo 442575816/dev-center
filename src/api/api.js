@@ -68,6 +68,21 @@ export const getFileOutList = params => { return axios.post(`${base}/getFileOutL
 // 下载文件
 export const downloadFile = params => { return axios.get(`${base}/download.action`, { params: params, responseType:'blob' }); };
 
+// 开始部署流程
+export const startDeploy = params => { return axios.post(`${base}/startDeploy.action`, params); };
+
+// 进行流程
+export const deploy = params => { return axios.post(`${base}/deploy.action`, params); };
+
+// 获取下拉列表
+export const getDeployOptions = params => { return axios.post(`${base}/getDeployOptions.action`, params); };
+
+// 获取待发布列表
+export const getMobFrontPreReleaseDeploy = params => { return axios.post(`${base}/getMobFrontPreReleaseDeploy.action`, params); };
+
+// 获取待发布列表
+export const getMobFrontPreReleaseInfo = params => { return axios.post(`${base}/getMobFrontPreReleaseInfo.action`, params); };
+
 // 外传内上传地址定义
 export const fileInURL = `${base}/fileIn.action`;
 
@@ -82,3 +97,6 @@ export const getMyFlowURL = `${base}/getMyFlow.action?flowId=SvnAuth_1`;
 
 // 创建申请地址
 export const createFlowURL = `${base}/createFlow.action?flowId=SvnAuth_1`;
+
+// 上传部署发布的文件
+export const uploadDeployFileURL = `${base}/uploadDeployFile.action`;
