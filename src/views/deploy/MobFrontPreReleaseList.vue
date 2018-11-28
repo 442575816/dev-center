@@ -72,7 +72,7 @@
 
 <script>
 import { setTimeout } from 'timers';
-import { getMobFrontPreReleaseDeploy } from '../../api/api';
+import { getMobFrontPreReleaseDeploy, cancelDeploy } from '../../api/api';
 import { vueContext } from '../../api/api';
 import Vue from 'vue';
 import Axios from 'axios';
@@ -109,7 +109,11 @@ export default {
         },
         // 取消发布
         handleCancelRelease(index, row) {
-            this.$router.push({ path: '/mobfrontrelease/' + row.deployId });
+            let _this = this
+            cancelDeploy({deployId: row.deployId}).then(function(resp){
+                _this.preReleaseDeploys.splice(index, 1)
+                _this.preReleaseDeploysCache[row.project] = _this.preReleaseDeploys
+            })
         },
         // 发布
         handleRelease(index, row) {

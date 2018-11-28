@@ -1,7 +1,6 @@
 <template>
 <div v-if="form.submitSucc == false">
 	<el-form :model="form" ref="deployForm">
-        <el-input type="hidden" v-model="form.deployId"></el-input>
         <div class="info_div">
         <el-form-item>
         <div class="el-collapse-item__header">基础信息</div>
@@ -9,28 +8,29 @@
 		<el-form-item label="项目名称：" prop="project" :rules="[
             { required: true, message: '项目名称不能为空'},
         ]">
-            <el-select 
-              v-model="form.project"
-              @change="handleProjChange"
-              placeholder="选择项目">
+            <el-select v-model="form.project" placeholder="选择项目">
             <el-option label="最佳阵容" value="zjzr"></el-option>
             <el-option label="中超荣耀" value="zc2017"></el-option>
             </el-select>
 		</el-form-item>
+        <el-form-item label="目录类型：" prop="folderType" :rules="[
+            { required: true, message: '目录类型不能为空'},
+        ]">
+            <el-select v-model="form.folderType" placeholder="选择目录类型">
+            <el-option label="backend" value="backend"></el-option>
+            <el-option label="frontend" value="frontend"></el-option>
+            <el-option label="hotswap" value="hotswap"></el-option>
+            <el-option label="kf" value="kf"></el-option>
+            <el-option label="sql" value="sql"></el-option>
+            <el-option label="update" value="update"></el-option>
+            </el-select>
+		</el-form-item>
         <el-form-item>
-        <span class="el-form-item__label">
-            打包版本号：<span class="version-text">{{ form.packVersion }}</span>
-        </span>
-        <span class="el-form-item__label">
-            资源包版本号：<span class="version-text">{{ form.resVersion }}</span>
-        </span>
-        <span class="el-form-item__label">
-            上传文件名：<span class="version-text">{{ form.uploadFileName }}</span>
-        </span>
+
         </el-form-item>
         <br/>
         <!-- 文件上传 -->
-        <el-form-item label="上传更新文件：">
+        <el-form-item label="上传文件到OSS：">
             <el-upload
 			class="upload-demo"
 			:action="uploadURL"
@@ -74,58 +74,16 @@
 		</div>
         </el-form-item>
 
-        <el-row>
-        <el-col :span="8">
-        <el-form-item label="更新区域：" prop="updateRegion" :rules="[
-            { required: true, message: '更新区域不能为空'},
-        ]">
-            <el-select v-model="form.updateRegion" placeholder="选择更新区域" @change="handleReignChange">
-            <el-option 
-              v-for="item in form.regionOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-            </el-select>
-		</el-form-item>
-        </el-col>
-        <el-col :span="16">
-        <el-form-item label="更新频道：" prop="updateChannel" :rules="[
-            { required: true, message: '更新频道不能为空'},
-        ]">
-           <el-select v-model="form.updateChannel" multiple placeholder="选择更新频道">
-            <el-option 
-              v-for="item in form.channelOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-            </el-select>
-		</el-form-item>
-        </el-col>
-        </el-row>
-
-        <el-form-item label="更新说明：" prop="updateIntro" :rules="[
-            { required: true, message: '更新说明不能为空'},
+        <el-form-item label="远程目录：" prop="remoteFolder" :rules="[
+            { required: true, message: '远程目录不能为空'},
         ]">
            <el-input
-            placeholder="请输入本次更新说明"
-            v-model="form.updateIntro">
+            placeholder="请填写远程目录，如果目录已经存在，将不会上传文件"
+            v-model="form.remoteFolder">
            </el-input>
 		</el-form-item>
-
-        <el-form-item label="隐藏频道：">
-           <el-select v-model="form.hiddenChannel" multiple placeholder="请输入需要隐藏更新的频道" size="medium">
-            <el-option 
-              v-for="item in form.channelOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-           </el-select>
-		</el-form-item>
         </div>
-        
+
         <el-form-item>
             <el-button type="primary" @click="onSubmit" :loading="submiting">提交</el-button>
         </el-form-item>
@@ -133,7 +91,7 @@
 </div>
 <div v-else>
     <el-alert
-    title="发布成功，请查看邮件"
+    title="上传成功，请前往oss查看"
     type="success"
     style="line-height:48px"
     :closable="false">
@@ -143,7 +101,7 @@
 
 <script>
 import { setTimeout } from 'timers';
-import { startDeploy, deploy, uploadDeployFileURL, getDeployOptions } from '../../api/api';
+import { startDeploy, deploy, uploadDeployFileURL } from '../../api/api';
 import { vueContext } from '../../api/api';
 import Vue from 'vue';
 import Axios from 'axios';
@@ -154,19 +112,10 @@ export default {
       return {
         form: {
           project: '',
-          deployId: '',
-          updateRegion: '',
-          updateChannel: [],
-          channelOptions:[],
-          regionOptions: [],
-          hiddenChannel: '',
-          updateIntro: '',
-          packVersion: "unknow",
-          resVersion: "unknow",
-          uploadFileName: "unknow",
+          folderType: '',
+          remoteFolder: '',
           submitSucc: false,
         },
-        selectOptionsCache: {},
         fileList: [],
         center: true,
         closable: false,
@@ -176,7 +125,7 @@ export default {
     },
     mounted() {
         let _this = this;
-        startDeploy({deployType:'mobfrontend'}).then(function(resp){
+        startDeploy({deployType:'ftpupload'}).then(function(resp){
 			_this.form.deployId = resp.data.data.deployId
 		}).catch(err=>{
 			console.log(err);
@@ -192,19 +141,16 @@ export default {
                     let formData = {
                         deployId: this.form.deployId,
                         project: this.form.project,
-                        updateRegion: this.form.updateRegion,
-                        updateChannel: this.form.updateChannel,
-                        hiddenChannel: this.form.hiddenChannel,
-                        updateIntro: this.form.updateIntro
+                        folderType: this.form.folderType,
+                        remoteFolder: this.form.remoteFolder,
                     }
                     let json = JSON.stringify(formData)
-
-                    let _this = this
+                    var _this = this
                     deploy({
                         data: json
-                    }).then(function(resp){
+                    }).then(function(resp) {
                         _this.submiting = false
-                        _this.form.submitSucc = resp.data.state == 1
+                        _this.form.submitSucc = (resp.data.state == 1)
                     })
                     console.log("submit" + json)
                 } else {
@@ -212,32 +158,6 @@ export default {
                     return false;
                 }
             })
-        },
-        // 选择的项目发生变化
-        handleProjChange(value) {
-            if (this.selectOptionsCache[value] === undefined) {
-                var _this = this
-                getDeployOptions({projName: value, deployId: this.form.deployId}).then(function(resp){
-                    _this.selectOptionsCache[value] = resp.data.data.regionOptions
-                    _this.form.regionOptions = _this.selectOptionsCache[value]
-                    _this.form.updateRegion = ''
-                    _this.form.updateChannel = []
-                })
-            } else {
-                this.form.regionOptions = this.selectOptionsCache[value]
-                this.form.updateRegion = ''
-                this.form.updateChannel = []
-            }
-        },
-        // 选择更新区域变化
-        handleReignChange(value) {
-            for (var index in this.form.regionOptions) {
-                var regionOption = this.form.regionOptions[index]
-                if (regionOption.value == value) {
-                    this.form.channelOptions = regionOption.channelOptions
-                    this.form.updateChannel = []
-                }
-            }
         },
         // 正式上传文件
         submitUpload(){
@@ -314,11 +234,7 @@ export default {
                     type: 'error'
                 });
                 return;
-            } else {
-                this.form.resVersion = resp.data.resVersion
-                this.form.packVersion = resp.data.packVersion
-                this.form.uploadFileName = resp.data.uploadFileName
-            }
+            } 
         },
         // 格式化文件大小
         fileSizeFormatter(row, column) {

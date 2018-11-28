@@ -1,5 +1,5 @@
 <template>
-<div>
+<div v-if="form.submitSucc == false">
 	<el-form :model="form" ref="deployForm">
         <el-input type="hidden" v-model="form.deployId"></el-input>
         <div class="info_div">
@@ -44,9 +44,17 @@
         </div>
         
         <el-form-item>
-            <el-button type="primary" @click="onSubmit">发布到正式环境</el-button>
+            <el-button type="primary" @click="onSubmit" :loading="submiting">发布到正式环境</el-button>
         </el-form-item>
 	</el-form>
+</div>
+<div v-else>
+    <el-alert
+    title="发布成功，请查看邮件"
+    type="success"
+    style="line-height:48px"
+    :closable="false">
+   </el-alert>
 </div>
 </template>
 
@@ -71,8 +79,9 @@ export default {
           packVersion: "unknow",
           resVersion: "unknow",
           uploadFileName: "unknow",
-
+          submitSucc: false,
         },
+        submiting: false,
       }
     },
     mounted() {
@@ -83,7 +92,7 @@ export default {
             _this.form.resVersion = resp.data.data.resVersion
             _this.form.updateRegion = resp.data.data.updateRegion
             _this.form.updateChannel = resp.data.data.updateChannel
-            _this.form.hiddenChannels = resp.data.data.hiddenChannels
+            _this.form.hiddenChannel = resp.data.data.hiddenChannel
             _this.form.updateIntro = resp.data.data.updateIntro
             _this.form.uploadFileName = resp.data.data.uploadFileName
             _this.form.deployUser = resp.data.data.deployUser
@@ -95,14 +104,18 @@ export default {
         onSubmit() {
             this.$refs.deployForm.validate((valid) => {
                 if (valid) {
+                    this.submiting = true
                     // 提交
                     let formData = {
                         deployId: this.form.deployId
                     }
                     let json = JSON.stringify(formData)
+                    let _this = this
                     deploy({
                         data: json
                     }).then(function(resp){
+                        _this.submiting = false
+                        _this.form.submitSucc = resp.data.state == 1
                     })
                     console.log("submit" + json)
                 } else {

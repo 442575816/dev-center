@@ -1,5 +1,5 @@
 <template>
-<div>
+<div v-if="form.submitSucc == false">
 	<el-form :model="form" ref="deployForm">
         <el-input type="hidden" v-model="form.deployId"></el-input>
         <div class="info_div">
@@ -198,9 +198,17 @@
         </div>
         </div>
         <el-form-item>
-            <el-button type="primary" @click="onSubmit">提交</el-button>
+            <el-button type="primary" @click="onSubmit" :loading="submiting">提交</el-button>
         </el-form-item>
 	</el-form>
+</div>
+<div v-else>
+    <el-alert
+    title="发布成功，请查看邮件"
+    type="success"
+    style="line-height:48px"
+    :closable="false">
+   </el-alert>
 </div>
 </template>
 
@@ -234,12 +242,13 @@ export default {
           packVersion: "unknow",
           backVersion: "unknow",
           uploadFileName: "unknow",
-
+          submitSucc: false,
         },
         fileList: [],
         center: true,
         closable: false,
-        uploadURL: uploadDeployFileURL
+        uploadURL: uploadDeployFileURL,
+        submiting: false
       }
     },
     mounted() {
@@ -254,6 +263,8 @@ export default {
         onSubmit() {
             this.$refs.deployForm.validate((valid) => {
                 if (valid) {
+                    this.submiting = true
+
                     // 提交
                     let formData = {
                         deployId: this.form.deployId,
@@ -263,7 +274,7 @@ export default {
                         serverType: this.form.serverType,
                         updateContent: this.form.updateContent,
                         updateRange: this.form.updateRange,
-                        updateStep: this.form.updateRange,
+                        updateStep: this.form.updateStep,
                         updateType: this.form.updateType,
                         configUpdate: this.form.configUpdate,
                         restartServer: this.form.restartServer,
@@ -274,9 +285,12 @@ export default {
                         fileList: this.form.fileTags
                     }
                     let json = JSON.stringify(formData)
+                    var _this = this
                     deploy({
                         data: json
-                    }).then(function(resp){
+                    }).then(function(resp) {
+                        _this.submiting = false
+                        _this.form.submitSucc = (resp.data.state == 1)
                     })
                     console.log("submit" + json)
                 } else {
@@ -370,6 +384,9 @@ export default {
                 this.form.updateType = resp.data.updateType
                 this.form.fileTags = resp.data.onlineFiles
                 this.form.uploadFileName = resp.data.uploadFileName
+                if (resp.data.updateStep != this.form.updateStep) {
+                    this.form.updateStep = resp.data.updateStep
+                }
                 if (this.form.fileTags == null) {
                     this.form.fileTags = []
                 }

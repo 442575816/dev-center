@@ -4,6 +4,7 @@ import BackendDeploy from '../../views/deploy/BackendDeploy.vue'
 import MobFrontDeploy from '../../views/deploy/MobFrontDeploy.vue'
 import MobFrontRelease from '../../views/deploy/MobFrontRelease.vue'
 import MobFrontPreReleaseList from '../../views/deploy/MobFrontPreReleaseList.vue'
+import FtpUpload from '../../views/deploy/FtpUpload.vue'
 
 const deployRouter = {
     path: '/',
@@ -26,6 +27,16 @@ const deployRouter = {
             path: '/backend', 
             component: BackendDeploy, 
             name: '后端上线',
+            meta: {
+                title: 'DeployPermission',
+                icon: 'lock',
+                roles: ['admin', 'qa', 'dev']
+            }
+        },
+        { 
+            path: '/ftpupload', 
+            component: FtpUpload, 
+            name: 'FTP文件上传',
             meta: {
                 title: 'DeployPermission',
                 icon: 'lock',

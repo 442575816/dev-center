@@ -1,6 +1,8 @@
 import axios from 'axios';
 import Qs from 'qs'
 import { getCookie } from '../utils/cookie';
+import { Message } from 'element-ui'
+import router from '@/router'
 
 // url base
 let base = "";
@@ -36,19 +38,13 @@ axios.defaults.transformResponse = [function (text) {
         return text
     }
     let response = JSON.parse(text)
-    if (response.state == 4 && vueContext.vue) {
-        vueContext.vue.$message({
-            message: response.data.msg,
-            type: 'error'
-        });
+    if (response.state == 4) {
+        Message.error(response.data.msg)
         setTimeout(function(){
-            vueContext.vue.$router.push({ path: '/login' });
+            router.push({ path: '/login' });
         }, 2000)
-    } else if (response.state == 0 && vueContext.vue) {
-        vueContext.vue.$message({
-            message: response.data.msg,
-            type: 'error'
-        });
+    } else if (response.state == 0) {
+        Message.error(response.data.msg)
     }
     return response;
 }]
@@ -73,6 +69,9 @@ export const startDeploy = params => { return axios.post(`${base}/startDeploy.ac
 
 // 进行流程
 export const deploy = params => { return axios.post(`${base}/deploy.action`, params); };
+
+// 进行流程
+export const cancelDeploy = params => { return axios.post(`${base}/cancelDeploy.action`, params); };
 
 // 获取下拉列表
 export const getDeployOptions = params => { return axios.post(`${base}/getDeployOptions.action`, params); };
