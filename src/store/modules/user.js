@@ -1,5 +1,6 @@
 import { requestLogin, requestLoginByToken } from '@/api/api'
 import { Message } from 'element-ui'
+import { getToken, setToken, removeToken } from '@/utils/auth'
 
 
 const user = {
@@ -32,6 +33,7 @@ const user = {
   actions: {
     UpdateUserInfo({ commit, dispatch }, data) {
       return new Promise((resolve) => {
+          setToken(data.loginToken)
           commit('SET_LOGINTOKEN', data.loginToken)
           commit('SET_USERNAME', data.userName)
           commit('SET_NICKNAME', data.nickName)
@@ -88,6 +90,7 @@ const user = {
       return new Promise(resolve => {
         commit('SET_LOGINTOKEN', '')
         commit('SET_ROLES', [])
+        removeToken()
         resolve()
       })
     },

@@ -5,6 +5,7 @@ import MobFrontDeploy from '../../views/deploy/MobFrontDeploy.vue'
 import MobFrontRelease from '../../views/deploy/MobFrontRelease.vue'
 import MobFrontPreReleaseList from '../../views/deploy/MobFrontPreReleaseList.vue'
 import FtpUpload from '../../views/deploy/FtpUpload.vue'
+import WebFrontDeploy from '../../views/deploy/WebFrontDeploy.vue'
 
 const deployRouter = {
     path: '/',
@@ -68,6 +69,16 @@ const deployRouter = {
             path: '/mobfrontprereleaselist', 
             component: MobFrontPreReleaseList, 
             name: '移动前端正式上线',
+            meta: {
+                title: 'DeployPermission',
+                icon: 'lock',
+                roles: ['admin', 'qa', 'dev']
+            }
+        },
+        { 
+            path: '/webfrontdeploy', 
+            component: WebFrontDeploy, 
+            name: '页游前端更新',
             meta: {
                 title: 'DeployPermission',
                 icon: 'lock',

@@ -10,14 +10,14 @@
     "build": "node build/build.js"
   },
   "dependencies": {
-    "axios": "^0.15.3",
+    "axios": "^0.18.0",
     "echarts": "^3.3.2",
     "element-ui": "^1.2.8",
     "font-awesome": "^4.7.0",
     "nprogress": "^0.2.0",
-    "vue": "^2.2.2",
-    "vue-router": "^2.3.0",
-    "vuex": "^2.0.0-rc.6",
+    "vue": "^2.5.17",
+    "vue-router": "^3.0.2",
+    "vuex": "^3.0.1",
     "namedavatar":"^1.0.0"
   },
   "devDependencies": {
@@ -65,7 +65,7 @@
     "namedavatar":"^1.0.0"
   },
   "engines": {
-    "node": ">= 4.0.0",
+    "node": ">= 6.0.0",
     "npm": ">= 3.0.0"
   },
   "browserslist": [

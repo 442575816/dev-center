@@ -2,6 +2,7 @@ import router from './router'
 import store from './store'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css'// progress bar style
+import { getToken, getUser } from '@/utils/auth' // getToken from cookie
 
 NProgress.configure({ showSpinner: false })// NProgress Configuration
 
@@ -16,13 +17,24 @@ const whiteList = ['/login']// no redirect whitelist
 
 router.beforeEach((to, from, next) => {
   NProgress.start() // start progress bar
-  if (store.getters.loginToken) { // determine if there has token
+  if (getToken()) { // determine if there has token
     /* has token*/
     if (to.path === '/login') {
-      next({ path: '/' })
+      next()
       NProgress.done() // if current page is dashboard will not trigger	afterEach hook, so manually handle it
     } else {
-      if (store.getters.needReloadRouter) {
+      if (store.getters.needReloadRouter || store.getters.roles.length === 0) {
+        if (store.getters.roles.length === 0) {
+          // 重新登录
+          let user = getUser()
+          store.dispatch('RequestLoginByToken', {userName:user.userName, token:user.loginToken}).then(data=>{
+            // 重建router
+            router.addRoutes(store.getters.addRouters) // 动态添加可访问路由表
+            store.dispatch('MarkReloadFinish') // 标记自己完成刷新
+            next({ ...to, replace: true })
+          })
+          return
+        }
         // 重建router
         router.addRoutes(store.getters.addRouters) // 动态添加可访问路由表
         store.dispatch('MarkReloadFinish') // 标记自己完成刷新
